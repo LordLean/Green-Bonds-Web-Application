@@ -1,5 +1,6 @@
 import streamlit as st
 import os
+import platform
 
 from transformers import pipeline
 
@@ -19,8 +20,11 @@ st.set_page_config(
 # Load QA model.
 ###########################################
 cwd = os.getcwd()
-model_dir = cwd + "/finbert-pretrain-finetuned-squad"
-# model_dir = cwd + "\\finbert-pretrain-finetuned-squad"
+if platform.system() == "Windows":
+    model_dir = cwd + "\\finbert-pretrain-finetuned-squad"
+else:
+    model_dir = cwd + "/finbert-pretrain-finetuned-squad"
+    
 question_answering = pipeline("question-answering", model=model_dir, tokenizer=model_dir)
 #############################################################
 # question = "how are proceeds allocated?"
