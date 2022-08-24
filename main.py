@@ -135,6 +135,12 @@ if submitted and uploaded_file and queries:
                 try:
                     # QA on text:
                     results = question_answering(question=question, context=item["text"], device=0, top_k=3)
+
+                    # if len(results) == 4 then only one answer has been found and 4 corresponds to the number of keys.
+                    if len(results) == 4: 
+                        # Wrap in list to avoid TypeError later on.
+                        results = [results]
+
                     result = results[0] # Get highest scoring result.
                     # Answer
                     st.markdown("### Query Answer")
