@@ -19,7 +19,7 @@ st.set_page_config(
 # Load QA model.
 ###########################################
 cwd = os.getcwd()
-model_dir = cwd + "\\finbert-pretrain-finetuned-squad"
+model_dir = cwd + "\/finbert-pretrain-finetuned-squad"
 question_answering = pipeline("question-answering", model=model_dir, tokenizer=model_dir)
 #############################################################
 # question = "how are proceeds allocated?"
