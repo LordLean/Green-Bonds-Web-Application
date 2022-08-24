@@ -24,7 +24,7 @@ if platform.system() == "Windows":
     model_dir = cwd + "\\finbert-pretrain-finetuned-squad"
 else:
     model_dir = cwd + "/finbert-pretrain-finetuned-squad"
-    
+
 question_answering = pipeline("question-answering", model=model_dir, tokenizer=model_dir)
 #############################################################
 # question = "how are proceeds allocated?"
@@ -124,11 +124,39 @@ if submitted and uploaded_file and queries:
 
     # Get bm25 top results.
     top_items = get_ranked_texts(reader, queries=split_queries, weights=split_weights, n=n_items)
+
+    # if question then get answers for top items.
+    if question:
+        for i, item in enumerate(top_items):
+            try:
+                # QA on text:
+                results = question_answering(question=question, context=item["text"], device=0, top_k=3)
+                # if len(results) == 4 then only one answer has been found and 4 corresponds to the number of keys.
+                if len(results) == 4: 
+                    # Wrap in list to avoid TypeError later on.
+                    results = [results]
+                result = results[0] # Get highest scoring result.
+
+                # Store answer + qa score in item.
+                item["answer"] = result["answer"]
+                item["score"] = result["score"]
+                # Store indicies of answer start and end
+                item["ans_start"] = result["start"]
+                item["ans_end"] = result["end"]
+                # Store retrieved index (ordered using bm25)
+                item["retrieved_idx"] = i + 1
+
+            except IndexError:
+                item["answer"] = "None"
+                item["Score"] = 0.0
+        # end loop + reorder top_items:
+        top_items.sort(key = lambda x : x["score"], reverse=True)
     
     # Display top items.
     for i, item in enumerate(top_items):
         # Title
-        st.markdown("## Retrieved Text {}".format(i+1))
+        ret_idx = i + 1 if not question else item["retrieved_idx"]
+        st.markdown("## Retrieved Text {}".format(ret_idx))
         # Create display columns
         text_col, result_col = st.columns((6,2))
 
@@ -136,26 +164,12 @@ if submitted and uploaded_file and queries:
         with result_col:
             # If question has been asked.
             if question:
-                try:
-                    # QA on text:
-                    results = question_answering(question=question, context=item["text"], device=0, top_k=3)
-
-                    # if len(results) == 4 then only one answer has been found and 4 corresponds to the number of keys.
-                    if len(results) == 4: 
-                        # Wrap in list to avoid TypeError later on.
-                        results = [results]
-
-                    result = results[0] # Get highest scoring result.
-                    # Answer
-                    st.markdown("### Query Answer")
-                    annotated_text((result['answer'], "", "#008000"))
-                    # st.write(result['answer'])
-                    # Score
-                    st.markdown("### Score:")
-                    st.markdown("#### **{}**".format(round(result['score'],5)))
-                    # st.write(results)
-                except IndexError:
-                    st.error("No Result")
+                # Answer
+                st.markdown("### Query Answer")
+                annotated_text((item['answer'], "", "#008000"))
+                # Score
+                st.markdown("### Score:")
+                st.markdown("#### **{}**".format(round(item['score'],5)))
             else:
                 pass
         # Text column containing Page no. and text.
@@ -164,10 +178,12 @@ if submitted and uploaded_file and queries:
             if question:
                 # For annotations sake.
                 # Get ans string.
-                ans = item["text"][result["start"]:result["end"]]
+                start_idx = item["ans_start"]
+                end_idx = item["ans_end"]
+                ans = item["text"][start_idx : end_idx]
                 # Split text before and after answer.
-                before_ans = item["text"][:result["start"]].split()
-                after_ans = item["text"][result["end"]:].split()
+                before_ans = item["text"][:start_idx].split()
+                after_ans = item["text"][end_idx:].split()
                 st.markdown("### Page: **{}**".format(item["page_num"]))
                 # Create list of str and tuples for input to text_annotation
                 ans_annotated = [(ans+ " ", "", "#008000")]
