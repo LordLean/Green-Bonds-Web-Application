@@ -1,7 +1,7 @@
 # Green Bond Analyzer Web Application
 
 ## Link to Site:
-[Click here](https://lordlean-green-bonds-web-application-main-6cje2b.streamlitapp.com/)
+[Click here](https://lordlean-green-bonds-web-application-main-u4d2ni.streamlitapp.com/)
 
 ## Intended Usage:
 This repository contains a fine-tuned BERT model for the NLP task of **question answering**. 
