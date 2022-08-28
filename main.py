@@ -20,7 +20,7 @@ st.set_page_config(
 ###########################################
 # Sidebar
 ###########################################
-st.sidebar.title("Application Settings Menu")
+st.sidebar.title("Upload Widget Menu")
 uploaded_file = st.sidebar.file_uploader("Upload your PDF file", type=["pdf"])
 
 ###########################################
@@ -78,14 +78,14 @@ question_answering = load_pipeline()
 # Answer Retrieval/Reranking
 ###########################################
 with st.form(key="Answer Retrieval Settings"):
-    st.markdown("### Answer Retrieval and Reranking")
+    st.markdown("### Passage Retrieval and Reranking")
     col1, col2 = st.columns((8,2))
-    queries = col1.text_area("Enter multiline answer retrieval queries")
+    queries = col1.text_area("Enter multiline Passage retrieval queries")
     weights = col2.text_area("Enter query weights")
 
     col3, col4 = st.columns((8,2))
     n_items = col3.number_input(label="Return top N items", min_value=1)
-    rerank = col4.radio("Answer Reranker", ["None", "T5", "BERT",])
+    rerank = col4.radio("Passage Reranker", ["None", "T5", "BERT",])
 
     st.markdown("### Question Answering")
     question = st.text_input("Enter query for question-answer system")
