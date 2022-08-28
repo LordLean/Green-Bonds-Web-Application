@@ -16,6 +16,18 @@ st.set_page_config(
     initial_sidebar_state="expanded",
     )
 
+###########################################
+# Load QA model.
+###########################################
+cwd = os.getcwd()
+if platform.system() == "Windows":
+    model_dir = cwd + "\\finbert-pretrain-finetuned-squad"
+else:
+    model_dir = cwd + "/finbert-pretrain-finetuned-squad"
+
+question_answering = pipeline("question-answering", model=model_dir, tokenizer=model_dir)
+#############################################################
+# question = "how are proceeds allocated?"
 
 ###########################################
 # Sidebar
@@ -58,20 +70,6 @@ if uploaded_file is not None:
 else:
     st.info("Please upload a PDF file to get started.")
 
-###########################################
-# Load QA model.
-###########################################
-cwd = os.getcwd()
-if platform.system() == "Windows":
-    model_dir = cwd + "\\finbert-pretrain-finetuned-squad"
-else:
-    model_dir = cwd + "/finbert-pretrain-finetuned-squad"
-
-# @st.cache(hash_funcs={tokenizers.Tokenizer: lambda _: None, tokenizers.AddedToken: lambda _: None})
-@st.cache(allow_output_mutation = True)
-def load_pipeline():
-    return pipeline("question-answering", model=model_dir, tokenizer=model_dir)
-question_answering = load_pipeline()
 
 
 ###########################################
