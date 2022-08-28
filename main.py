@@ -16,23 +16,11 @@ st.set_page_config(
     initial_sidebar_state="expanded",
     )
 
-###########################################
-# Load QA model.
-###########################################
-cwd = os.getcwd()
-if platform.system() == "Windows":
-    model_dir = cwd + "\\finbert-pretrain-finetuned-squad"
-else:
-    model_dir = cwd + "/finbert-pretrain-finetuned-squad"
-
-question_answering = pipeline("question-answering", model=model_dir, tokenizer=model_dir)
-#############################################################
-# question = "how are proceeds allocated?"
 
 ###########################################
 # Sidebar
 ###########################################
-st.sidebar.title("Upload Widget Menu")
+st.sidebar.title("Application Settings Menu")
 uploaded_file = st.sidebar.file_uploader("Upload your PDF file", type=["pdf"])
 
 ###########################################
@@ -70,20 +58,34 @@ if uploaded_file is not None:
 else:
     st.info("Please upload a PDF file to get started.")
 
+###########################################
+# Load QA model.
+###########################################
+cwd = os.getcwd()
+if platform.system() == "Windows":
+    model_dir = cwd + "\\finbert-pretrain-finetuned-squad"
+else:
+    model_dir = cwd + "/finbert-pretrain-finetuned-squad"
+
+# @st.cache(hash_funcs={tokenizers.Tokenizer: lambda _: None, tokenizers.AddedToken: lambda _: None})
+@st.cache(allow_output_mutation = True)
+def load_pipeline():
+    return pipeline("question-answering", model=model_dir, tokenizer=model_dir)
+question_answering = load_pipeline()
 
 
 ###########################################
 # Answer Retrieval/Reranking
 ###########################################
 with st.form(key="Answer Retrieval Settings"):
-    st.markdown("### Passage Retrieval and Reranking")
+    st.markdown("### Answer Retrieval and Reranking")
     col1, col2 = st.columns((8,2))
-    queries = col1.text_area("Enter multiline Passage retrieval queries")
+    queries = col1.text_area("Enter multiline answer retrieval queries")
     weights = col2.text_area("Enter query weights")
 
     col3, col4 = st.columns((8,2))
     n_items = col3.number_input(label="Return top N items", min_value=1)
-    rerank = col4.radio("Passage Reranker", ["None", "T5", "BERT",])
+    rerank = col4.radio("Answer Reranker", ["None", "T5", "BERT",])
 
     st.markdown("### Question Answering")
     question = st.text_input("Enter query for question-answer system")
